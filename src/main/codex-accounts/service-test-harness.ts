@@ -131,6 +131,7 @@ export function createSettings(overrides: Partial<GlobalSettings> = {}): GlobalS
     visibleTaskProvidersDefaultedForVolo: true,
     defaultRepoSelection: null,
     defaultLinearTeamSelection: null,
+    voloBoardView: { selectedBoardId: null, visibleColumnIdsByBoard: {} },
     opencodeSessionCookie: '',
     opencodeWorkspaceId: '',
     minimaxGroupId: '',

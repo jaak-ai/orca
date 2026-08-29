@@ -1,10 +1,18 @@
 import { useMemo, useState } from 'react'
 import type { VoloBoard, VoloTask, VoloTaskFilter } from '../../../../../shared/volo-types'
+import { filterVoloTasksByVisibleColumns } from '../volo/volo-column-visibility'
+import { useVoloBoardPreferences } from './use-volo-board-preferences'
 
 export function useTaskPageVoloListState() {
+  const {
+    selectedBoardId: selectedVoloBoardId,
+    selectBoard: setSelectedVoloBoardId,
+    visibleColumnIdsByBoard,
+    setVisibleColumnIds,
+    isColumnVisible
+  } = useVoloBoardPreferences()
   const [voloBoards, setVoloBoards] = useState<VoloBoard[]>([])
   const [voloBoardsLoading, setVoloBoardsLoading] = useState(false)
-  const [selectedVoloBoardId, setSelectedVoloBoardId] = useState<string | null>(null)
   const [voloTasks, setVoloTasks] = useState<VoloTask[]>([])
   const [voloLoading, setVoloLoading] = useState(false)
   const [voloError, setVoloError] = useState<string | null>(null)
@@ -20,18 +28,22 @@ export function useTaskPageVoloListState() {
   )
 
   const displayedVoloTasks = useMemo(() => {
+    const columnFiltered = filterVoloTasksByVisibleColumns(voloTasks, {
+      selectedBoardId: selectedVoloBoardId,
+      visibleColumnIdsByBoard
+    })
     const query = voloSearchInput.trim().toLowerCase()
     if (!query) {
-      return voloTasks
+      return columnFiltered
     }
-    return voloTasks.filter((task) => {
+    return columnFiltered.filter((task) => {
       return (
         task.taskCode.toLowerCase().includes(query) ||
         task.title.toLowerCase().includes(query) ||
         (task.description ?? '').toLowerCase().includes(query)
       )
     })
-  }, [voloSearchInput, voloTasks])
+  }, [selectedVoloBoardId, visibleColumnIdsByBoard, voloSearchInput, voloTasks])
 
   return {
     voloBoards,
@@ -40,6 +52,9 @@ export function useTaskPageVoloListState() {
     setVoloBoardsLoading,
     selectedVoloBoardId,
     setSelectedVoloBoardId,
+    visibleColumnIdsByBoard,
+    setVisibleColumnIds,
+    isColumnVisible,
     selectedVoloBoard,
     voloTasks,
     setVoloTasks,

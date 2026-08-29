@@ -1,4 +1,4 @@
-import { useEffect, type Dispatch, type SetStateAction } from 'react'
+import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
 import { voloListBoards, voloListTasks, voloMoveTask } from '@/runtime/runtime-volo-client'
 import type { GlobalSettings } from '../../../../../shared/global-settings-types'
 import type { TaskProvider } from '../../../../../shared/task-providers'
@@ -26,7 +26,7 @@ export function useTaskPageVoloFetch({
   settings: GlobalSettings | null
   voloTaskSourceContext: TaskSourceContext | null
   selectedVoloBoardId: string | null
-  setSelectedVoloBoardId: Dispatch<SetStateAction<string | null>>
+  setSelectedVoloBoardId: (boardId: string | null) => void
   setVoloBoards: Dispatch<SetStateAction<VoloBoard[]>>
   setVoloBoardsLoading: Dispatch<SetStateAction<boolean>>
   setVoloTasks: Dispatch<SetStateAction<VoloTask[]>>
@@ -39,6 +39,8 @@ export function useTaskPageVoloFetch({
   moveSelectedVoloTask: (task: VoloTask, columnId: string) => Promise<void>
 } {
   const runtimeSettings = voloTaskSourceContext ?? settings
+  const selectedVoloBoardIdRef = useRef(selectedVoloBoardId)
+  selectedVoloBoardIdRef.current = selectedVoloBoardId
 
   useEffect(() => {
     if (taskSource !== 'volo' || !voloConnected) {
@@ -52,11 +54,15 @@ export function useTaskPageVoloFetch({
           return
         }
         setVoloBoards(boards)
-        setSelectedVoloBoardId((current) =>
+        // Why: selectBoard is not a functional setter; a ref avoids refetching boards on selection change.
+        const current = selectedVoloBoardIdRef.current
+        const next =
           current && boards.some((board) => board.id === current)
             ? current
             : (boards[0]?.id ?? null)
-        )
+        if (next !== current) {
+          setSelectedVoloBoardId(next)
+        }
       })
       .catch((error: unknown) => {
         if (!cancelled) {
@@ -82,10 +88,12 @@ export function useTaskPageVoloFetch({
     voloRefreshNonce
   ])
 
+  // Why: column visibility is a client filter; it must not appear in these deps or toggles refetch.
   useEffect(() => {
     if (taskSource !== 'volo' || !voloConnected) {
       return
     }
+    // Why: assigned is cross-board and can load with no selection; all/done wait for a board.
     if (activeVoloPreset !== 'assigned' && !selectedVoloBoardId) {
       return
     }

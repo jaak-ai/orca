@@ -102,6 +102,55 @@ export type VoloTaskUpdate = {
   assigneeId?: string | null
 }
 
+export type VoloBoardViewPreferences = {
+  /** Board the Tasks page opens on. Null until the user picks one. */
+  selectedBoardId: string | null
+  /** Visible column ids per board. A board absent from the map shows every column. */
+  visibleColumnIdsByBoard: Record<string, string[]>
+}
+
+export const DEFAULT_VOLO_BOARD_VIEW: VoloBoardViewPreferences = {
+  selectedBoardId: null,
+  visibleColumnIdsByBoard: {}
+}
+
+/** Trust boundary for persisted JSON: tolerates missing/garbage input without throwing.
+ *  An empty array for a board is a legitimate "no columns visible" state. */
+export function normalizeVoloBoardView(value: unknown): VoloBoardViewPreferences {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return { selectedBoardId: null, visibleColumnIdsByBoard: {} }
+  }
+  const record = value as Record<string, unknown>
+  const selectedBoardId = typeof record.selectedBoardId === 'string' ? record.selectedBoardId : null
+  const visibleColumnIdsByBoard: Record<string, string[]> = {}
+  const rawMap = record.visibleColumnIdsByBoard
+  if (typeof rawMap === 'object' && rawMap !== null && !Array.isArray(rawMap)) {
+    for (const [boardId, columnIds] of Object.entries(rawMap)) {
+      // Why: hand-edited JSON can carry a __proto__ key; assigning it would pollute the prototype.
+      if (boardId === '__proto__' || !Array.isArray(columnIds)) {
+        continue
+      }
+      visibleColumnIdsByBoard[boardId] = columnIds.filter(
+        (id): id is string => typeof id === 'string'
+      )
+    }
+  }
+  return { selectedBoardId, visibleColumnIdsByBoard }
+}
+
+/** A board with no stored entry shows every column. */
+export function isVoloColumnVisible(
+  view: VoloBoardViewPreferences,
+  boardId: string,
+  columnId: string
+): boolean {
+  // Why: plain-object map; a hasOwn guard keeps inherited keys (e.g. 'constructor') from reading as entries.
+  if (!Object.hasOwn(view.visibleColumnIdsByBoard, boardId)) {
+    return true
+  }
+  return view.visibleColumnIdsByBoard[boardId].includes(columnId)
+}
+
 export const VOLO_PRIORITIES: readonly VoloPriority[] = ['low', 'medium', 'high', 'critical']
 
 export function isVoloPriority(value: unknown): value is VoloPriority {

@@ -1034,6 +1034,8 @@ export default function TaskPage(): React.JSX.Element {
     setVoloBoardsLoading,
     selectedVoloBoardId,
     setSelectedVoloBoardId,
+    visibleColumnIdsByBoard,
+    setVisibleColumnIds,
     selectedVoloBoard,
     voloTasks,
     setVoloTasks,
@@ -2806,7 +2808,16 @@ export default function TaskPage(): React.JSX.Element {
     setSelectedVoloBoardId,
     setNewVoloTaskOpen,
     voloBoardsLoading,
-    voloLoading
+    voloLoading,
+    selectedVoloBoard,
+    visibleVoloColumnIds:
+      selectedVoloBoardId == null ? null : (visibleColumnIdsByBoard[selectedVoloBoardId] ?? null),
+    setVisibleVoloColumnIds: (columnIds) => {
+      if (selectedVoloBoardId == null) {
+        return
+      }
+      setVisibleColumnIds(selectedVoloBoardId, columnIds)
+    }
   }
   const gitlabFilters: TaskPageGitlabFiltersProps = {
     gitlabView,

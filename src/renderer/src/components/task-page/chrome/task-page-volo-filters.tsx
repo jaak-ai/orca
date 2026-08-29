@@ -10,6 +10,8 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/utils'
@@ -29,6 +31,9 @@ export type TaskPageVoloFiltersProps = {
   setNewVoloTaskOpen: (open: boolean) => void
   voloBoardsLoading: boolean
   voloLoading: boolean
+  selectedVoloBoard: VoloBoard | null
+  visibleVoloColumnIds: string[] | null
+  setVisibleVoloColumnIds: (columnIds: string[] | null) => void
 }
 
 export function TaskPageVoloFilters({
@@ -43,8 +48,12 @@ export function TaskPageVoloFilters({
   setSelectedVoloBoardId,
   setNewVoloTaskOpen,
   voloBoardsLoading,
-  voloLoading
+  voloLoading,
+  selectedVoloBoard,
+  visibleVoloColumnIds,
+  setVisibleVoloColumnIds
 }: TaskPageVoloFiltersProps): React.JSX.Element {
+  const allColumnIds = selectedVoloBoard?.columns ? selectedVoloBoard.columns.map((c) => c.id) : []
   return (
     <div className="rounded-md rounded-b-none border border-border/50 bg-muted/50 px-3 pt-2 pb-0 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -70,6 +79,81 @@ export function TaskPageVoloFilters({
                 ))}
               </SelectContent>
             </Select>
+          ) : null}
+          {selectedVoloBoard &&
+          selectedVoloBoard.columns &&
+          selectedVoloBoard.columns.length > 0 ? (
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-8 border-border/50 bg-muted/50 text-xs font-medium shadow-sm px-3"
+                >
+                  {visibleVoloColumnIds === null ||
+                  visibleVoloColumnIds.length === selectedVoloBoard.columns.length
+                    ? translate('auto.components.TaskPage.voloColumns', 'Columns')
+                    : `${translate('auto.components.TaskPage.voloColumns', 'Columns')} · ${
+                        visibleVoloColumnIds.length
+                      }/${selectedVoloBoard.columns.length}`}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-2 flex flex-col gap-1.5" align="start">
+                <div className="flex items-center justify-between border-b border-border/50 pb-1.5 mb-1 px-1">
+                  <span className="text-xs font-semibold text-muted-foreground">
+                    {translate('auto.components.TaskPage.voloColumnsLabel', 'Columns')}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setVisibleVoloColumnIds(null)}
+                    className="text-[10px] font-medium text-primary hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                  >
+                    {translate('auto.components.TaskPage.voloAllColumns', 'All')}
+                  </button>
+                </div>
+                <div className="flex flex-col gap-1 max-h-[200px] overflow-y-auto scrollbar-sleek popover-scroll-content">
+                  {[...selectedVoloBoard.columns]
+                    .sort((a, b) => a.order - b.order)
+                    .map((column) => {
+                      const currentlyVisibleIds = visibleVoloColumnIds ?? allColumnIds
+                      const isChecked = currentlyVisibleIds.includes(column.id)
+                      return (
+                        <label
+                          key={column.id}
+                          className="flex items-center gap-2 rounded-sm px-1 py-1 hover:bg-muted/50 cursor-pointer text-xs transition-colors"
+                        >
+                          <Checkbox
+                            checked={isChecked}
+                            onCheckedChange={(checked) => {
+                              if (checked) {
+                                const nextIds = [...currentlyVisibleIds, column.id]
+                                if (nextIds.length === allColumnIds.length) {
+                                  setVisibleVoloColumnIds(null)
+                                } else {
+                                  setVisibleVoloColumnIds(nextIds)
+                                }
+                              } else {
+                                setVisibleVoloColumnIds(
+                                  currentlyVisibleIds.filter((id) => id !== column.id)
+                                )
+                              }
+                            }}
+                          />
+                          <span className="truncate flex-1 font-medium text-left">
+                            {column.name}
+                          </span>
+                          {column.color ? (
+                            <span
+                              className="size-2 rounded-full shrink-0"
+                              style={{ backgroundColor: column.color }}
+                            />
+                          ) : null}
+                        </label>
+                      )
+                    })}
+                </div>
+              </PopoverContent>
+            </Popover>
           ) : null}
           {voloPresets.map((preset) => {
             const active = !voloSearchInput && activeVoloPreset === preset.id
