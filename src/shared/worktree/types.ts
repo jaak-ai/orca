@@ -78,9 +78,13 @@ export type Worktree = {
   /** Checkout ownership for a recipe-provisioned main workspace. */
   ephemeralVmCheckoutMode?: EphemeralVmCheckoutMode
   displayName: string
+  /** Projection of persisted display-name provenance. */
+  displayNameMode?: 'fixed' | 'automatic'
   comment: string
   linkedIssue: number | null
   linkedPR: number | null
+  /** GitHub PR hidden from branch discovery after an explicit unlink. */
+  suppressedGitHubPR?: number | null
   linkedLinearIssue: string | null
   linkedLinearIssueWorkspaceId?: string | null
   linkedLinearIssueOrganizationUrlKey?: string | null
@@ -218,4 +222,6 @@ export type DetectedWorktreeListResult = {
   authoritative: boolean
   source: DetectedWorktreeListSource
   worktrees: DetectedWorktree[]
+  /** Why a non-authoritative listing could not be scanned; additive, older hosts omit it. */
+  unavailableReason?: string
 }

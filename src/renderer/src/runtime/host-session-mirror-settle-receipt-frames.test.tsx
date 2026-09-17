@@ -18,7 +18,10 @@ vi.mock('./web-session-terminal-handle-events', async (importOriginal) => {
 vi.mock('./use-runtime-session-mirror-environment-key', async () => {
   const { frameOrderingMocks } = await import('./host-session-mirror-frame-fixtures')
   return {
-    useRuntimeSessionMirrorEnvironmentKey: frameOrderingMocks.runtimeSessionMirrorEnvironmentKey
+    useRuntimeSessionMirrorEnvironmentKeys: () => ({
+      environmentKey: frameOrderingMocks.runtimeSessionMirrorEnvironmentKey(),
+      resubscribeSignal: ''
+    })
   }
 })
 
@@ -218,7 +221,8 @@ describe('a deferred visibility-resume repair patch', () => {
       type: 'snapshots',
       snapshots: [
         { ...makeHostSnapshot(WT, HOST_SURFACE_ID, HOST_PARENT_TAB_ID), snapshotVersion: 2 }
-      ]
+      ],
+      authoritative: true
     })
 
     // The tombstone repair DID reach the store: the background mirror retracted,
