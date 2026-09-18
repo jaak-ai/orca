@@ -7,6 +7,7 @@ import {
   getRepoExecutionHostId,
   getRepoSshConnectionId,
   getSettingsFocusedExecutionHostId,
+  resolvePreferredCreationHostScope,
   getSshTargetIdForExecutionHost,
   getWorktreeExecutionHostId,
   normalizeExecutionHostOrder,
@@ -156,6 +157,18 @@ describe('execution host identity', () => {
     expect(getSettingsFocusedExecutionHostId({ activeRuntimeEnvironmentId: 'runtime-1' })).toBe(
       'runtime:runtime-1'
     )
+  })
+
+  it('uses the default runtime for new work when the host filter is all hosts', () => {
+    expect(
+      resolvePreferredCreationHostScope('all', {
+        activeRuntimeEnvironmentId: '020914db-ee9e-4bc0-8adc-7a411228910a'
+      })
+    ).toBe('runtime:020914db-ee9e-4bc0-8adc-7a411228910a')
+    expect(
+      resolvePreferredCreationHostScope('local', { activeRuntimeEnvironmentId: 'env-1' })
+    ).toBe(LOCAL_EXECUTION_HOST_ID)
+    expect(resolvePreferredCreationHostScope('all', null)).toBe(LOCAL_EXECUTION_HOST_ID)
   })
 })
 

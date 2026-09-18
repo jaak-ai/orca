@@ -504,7 +504,7 @@ describe('useComposerState host-context boundaries', () => {
     // project set up only on a different host a silent no-op. The current host
     // must be a preference (focusedHostScope), with a fallback to any ready host.
     const handleProjectChange = COMPOSER_SOURCE.projectTarget
-    expect(handleProjectChange).toContain('focusedHostScope: preferredHostId ?? workspaceHostScope')
+    expect(handleProjectChange).toContain('focusedHostScope: preferredHostId ?? focusedHostScope')
     expect(handleProjectChange).not.toContain('hostId: preferredHostId')
   })
 

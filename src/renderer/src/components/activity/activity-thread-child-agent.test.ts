@@ -7,6 +7,7 @@ import {
   makeTabWithIds,
   makeWorkingEntryWithoutHistory,
   makeWorktree,
+  makeWorktreeWithId,
   PANE_KEY,
   PANE_KEY_2,
   PANE_KEY_3
@@ -88,6 +89,16 @@ describe('collectChildAgentPaneKeys', () => {
       })
     })
     expect(collectChildAgentPaneKeys([orphan]).size).toBe(0)
+  })
+
+  it('classifies a child worktree under its parent worktree thread', () => {
+    const parent = makeTestThread(PANE_KEY, { worktree: makeWorktreeWithId('pm') })
+    const child = makeTestThread(PANE_KEY_2, { worktree: makeWorktreeWithId('worker') })
+    expect(
+      collectChildAgentPaneKeys([parent, child], {
+        worker: { parentWorktreeId: 'pm' }
+      })
+    ).toEqual(new Set([PANE_KEY_2]))
   })
 
   it('ignores a self-referencing parentPaneKey', () => {

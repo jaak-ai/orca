@@ -75,6 +75,7 @@ export function useAgentPaneThreads(args: {
   visibleThreadGroups: ActivityThreadGroup[]
 } {
   const { query, readFilter, groupBy, selectedPaneKey, showChildAgents = false } = args
+  const worktreeLineageById = useAppStore((state) => state.worktreeLineageById)
   const agentsVisibleHostIds = useAppStore((s) => s.agentsVisibleHostIds)
   const agentsFilterRepoIds = useAppStore((s) => s.agentsFilterRepoIds)
   // Why project: the unified tab map is rewritten on every tab focus; the projection keeps
@@ -196,8 +197,11 @@ export function useAgentPaneThreads(args: {
   // reclassify its workers as orphans.
   // Skipped entirely when children are shown: nothing reads the set then.
   const childAgentPaneKeys = useMemo(
-    () => (showChildAgents ? EMPTY_PANE_KEYS : collectChildAgentPaneKeys(allThreads)),
-    [allThreads, showChildAgents]
+    () =>
+      showChildAgents
+        ? EMPTY_PANE_KEYS
+        : collectChildAgentPaneKeys(allThreads, worktreeLineageById),
+    [allThreads, showChildAgents, worktreeLineageById]
   )
 
   // Why deferred: filtering hundreds of threads is interruptible background work; the input

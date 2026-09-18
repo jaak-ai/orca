@@ -1,53 +1,15 @@
-import { z } from 'zod'
-import { defineMethod, type RpcAnyMethod } from '../core'
-import { OptionalPlainString, OptionalString, requiredString } from '../schemas'
+import { defineMethod } from '../core'
+import {
+  BoardId,
+  Connect,
+  CreateTask,
+  ListTasks,
+  MoveTask,
+  TaskCode,
+  UpdateTask
+} from '../../../../shared/rpc-contract/volo-params'
 
-const Connect = z.object({
-  apiUrl: OptionalPlainString,
-  apiToken: requiredString('API token is required'),
-  webUrl: OptionalPlainString
-})
-
-const BoardId = z.object({
-  boardId: requiredString('Board ID is required')
-})
-
-const ListTasks = z.object({
-  boardId: OptionalString,
-  filter: z.enum(['assigned', 'all', 'done']).optional()
-})
-
-const TaskCode = z.object({
-  taskCode: requiredString('Task code is required')
-})
-
-const CreateTask = z.object({
-  boardId: requiredString('Board ID is required'),
-  title: requiredString('Title is required'),
-  columnId: requiredString('Column is required'),
-  description: OptionalPlainString,
-  priority: z.enum(['low', 'medium', 'high', 'critical']).optional(),
-  assigneeId: OptionalString
-})
-
-const UpdateTask = z.object({
-  boardId: requiredString('Board ID is required'),
-  taskId: requiredString('Task ID is required'),
-  updates: z.object({
-    title: OptionalString,
-    description: OptionalString,
-    priority: z.enum(['low', 'medium', 'high', 'critical']).optional(),
-    assigneeId: z.union([z.string(), z.null()]).optional()
-  })
-})
-
-const MoveTask = z.object({
-  boardId: requiredString('Board ID is required'),
-  taskId: requiredString('Task ID is required'),
-  columnId: requiredString('Column is required')
-})
-
-export const VOLO_METHODS: RpcAnyMethod[] = [
+export const VOLO_METHODS = [
   defineMethod({
     name: 'volo.connect',
     params: Connect,

@@ -4,6 +4,7 @@ import { TaskPageSourceBar } from './SourceBar'
 import { AlertCircle } from 'lucide-react'
 import { TaskPageGitHubModeControls } from './github/ModeControls'
 import { TaskPageProviderFilters } from './ProviderFilters'
+import { VoloWorkQueuePanel } from './volo/volo-work-queue-panel'
 export function TaskPageListChrome({
   model
 }: {
@@ -30,6 +31,16 @@ export function TaskPageListChrome({
           <TaskPageGitHubModeControls model={model} />
 
           <TaskPageProviderFilters model={model} />
+          {model.taskSource === 'volo' && model.voloConnected ? (
+            <VoloWorkQueuePanel
+              queue={model.voloWorkQueue.queue}
+              setDispatching={model.voloWorkQueue.setDispatching}
+              setPmEnabled={model.voloWorkQueue.setPmEnabled}
+              setItemParallel={model.voloWorkQueue.setItemParallel}
+              removeItem={model.voloWorkQueue.removeItem}
+              clearFinished={model.voloWorkQueue.clearFinished}
+            />
+          ) : null}
         </div>
       </section>
     </div>

@@ -201,6 +201,7 @@ export function buildDefaultSettings(args: {
     defaultRepoSelection: null,
     defaultLinearTeamSelection: null,
     voloBoardView: { selectedBoardId: null, visibleColumnIdsByBoard: {} },
+    voloWorkQueue: { queuesByRepoId: {} },
     opencodeSessionCookie: '',
     opencodeWorkspaceId: '',
     minimaxGroupId: '',

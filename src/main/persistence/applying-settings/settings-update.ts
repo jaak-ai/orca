@@ -17,6 +17,7 @@ import { normalizeSourceControlGroupOrder } from '../../../shared/source-control
 import { normalizeAppIconId } from '../../../shared/app-icon'
 import { normalizeUiLanguage } from '../../../shared/ui-language'
 import { normalizeVoloBoardView } from '../../../shared/volo-types'
+import { normalizeVoloWorkQueue } from '../../../shared/volo-work-queue-normalize'
 import { normalizeWorktreeVisibilityDefaults } from '../../../shared/external-worktree-visibility'
 import { normalizePRBotAuthorOverrides } from '../../../shared/pr-bot-author-overrides'
 import type { PersistedState } from '../../../shared/persisted-state-types'
@@ -180,6 +181,9 @@ export function updateSettings(
   }
   if ('voloBoardView' in updates) {
     sanitizedUpdates.voloBoardView = normalizeVoloBoardView(updates.voloBoardView)
+  }
+  if ('voloWorkQueue' in updates) {
+    sanitizedUpdates.voloWorkQueue = normalizeVoloWorkQueue(updates.voloWorkQueue)
   }
   if ('prBotAuthorOverrides' in updates) {
     // Why: every writer (desktop IPC, web RPC, migrations) hits this boundary, so the persisted list stays bounded and well-formed.

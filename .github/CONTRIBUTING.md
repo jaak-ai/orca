@@ -26,6 +26,14 @@ Before a cross-architecture build (including `pnpm build:mac`, which produces bo
 arm64 artifacts by default), run `pnpm install:release` to add the other CPU's variants.
 See [the install policy](../docs/reference/pnpm-install-policy.md).
 
+To compile this checkout, replace `/Applications/Orca.app`, and launch it:
+
+```bash
+pnpm install:local
+```
+
+Apple Silicon only: unpacked `arm64`, no Intel/x64, no DMG. Pass flags after `--`, for example `--skip-typecheck` for a faster compile, `--skip-build` to reinstall an already packaged `dist/mac-arm64/Orca.app`, and `--dest <path>` to install somewhere other than `/Applications/Orca.app`.
+
 ## Branch Naming
 
 Use a clear, descriptive branch name that reflects the change.

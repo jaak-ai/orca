@@ -73,6 +73,7 @@ export type ComposerTargetStoreModel = {
   runtimeEnvironments: readonly PublicKnownRuntimeEnvironment[]
   runtimeStatusByEnvironmentId: Map<string, RuntimeEnvironmentStatus>
   workspaceHostScope: WorkspaceHostScope
+  focusedHostScope: ExecutionHostId
   eligibleRepos: Repo[]
   hostOptions: ExecutionHostRegistryEntry[]
   actionableHostIds: Set<ExecutionHostId>

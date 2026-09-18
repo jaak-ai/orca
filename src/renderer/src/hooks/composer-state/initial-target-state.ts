@@ -16,7 +16,7 @@ type ComposerInitialTargetStateInput = Pick<
   | 'projects'
   | 'repoIdOverride'
   | 'seedActiveRepoId'
-  | 'workspaceHostScope'
+  | 'focusedHostScope'
   | 'workspaceStatuses'
 >
 
@@ -42,7 +42,7 @@ export function useComposerInitialTargetState(input: ComposerInitialTargetStateI
     projects,
     repoIdOverride,
     seedActiveRepoId,
-    workspaceHostScope,
+    focusedHostScope,
     workspaceStatuses
   } = input
   const { resolveInitialWorkspaceRunSeed } = decisions
@@ -84,7 +84,7 @@ export function useComposerInitialTargetState(input: ComposerInitialTargetStateI
     projectId: initialRunSeed.projectId,
     hostId: initialRunSeed.hostId,
     projectHostSetupId: initialRunSeed.projectHostSetupId,
-    focusedHostScope: workspaceHostScope,
+    focusedHostScope,
     actionableHostIds
   })
 

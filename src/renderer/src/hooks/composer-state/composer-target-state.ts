@@ -31,7 +31,7 @@ export function useComposerTargetState(
     projects: composerTargetStore.projects,
     repoIdOverride: composerTargetStore.repoIdOverride,
     seedActiveRepoId: composerTargetStore.seedActiveRepoId,
-    workspaceHostScope: composerTargetStore.workspaceHostScope,
+    focusedHostScope: composerTargetStore.focusedHostScope,
     workspaceStatuses: composerTargetStore.workspaceStatuses
   })
   const runtimeTargetSelection = useComposerRuntimeTargetSelection({
@@ -49,7 +49,7 @@ export function useComposerTargetState(
     selectedProjectHostSetupOverrideId: initialTargetState.selectedProjectHostSetupOverrideId,
     settings: composerTargetStore.settings,
     sshConnectionStates: composerTargetStore.sshConnectionStates,
-    workspaceHostScope: composerTargetStore.workspaceHostScope,
+    focusedHostScope: composerTargetStore.focusedHostScope,
     worktreesByRepo: composerTargetStore.worktreesByRepo
   })
   const sourceContextState = useComposerSourceContextState({

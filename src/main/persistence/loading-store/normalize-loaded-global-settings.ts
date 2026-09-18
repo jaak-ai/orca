@@ -50,7 +50,8 @@ export function normalizeLoadedGlobalSettings(
     mobilePairingCustomAddresses,
     normalizedNotifications,
     normalizedSourceControlGroupOrder,
-    normalizedVoloBoardView
+    normalizedVoloBoardView,
+    normalizedVoloWorkQueue
   } = profile
 
   return {
@@ -132,6 +133,7 @@ export function normalizeLoadedGlobalSettings(
     sourceControlAi: migratedSourceControlAi,
     sourceControlGroupOrder: normalizedSourceControlGroupOrder,
     voloBoardView: normalizedVoloBoardView,
+    voloWorkQueue: normalizedVoloWorkQueue,
     // Why: rollback builds still read commitMessageAi, so refresh the legacy projection from sourceControlAi for compat.
     commitMessageAi: projectSourceControlAiToLegacyCommitMessageAi(
       migratedSourceControlAi,

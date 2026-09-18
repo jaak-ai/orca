@@ -33,7 +33,7 @@ type ProjectTargetActionsInput = Pick<
   | 'setSparseSelectedPresetId'
   | 'setStartFromResetHint'
   | 'selectedWorkspaceTarget'
-  | 'workspaceHostScope'
+  | 'focusedHostScope'
 >
 
 import { useCallback } from 'react'
@@ -79,7 +79,7 @@ export function useProjectTargetActions(input: ProjectTargetActionsInput) {
     setSparseSelectedPresetId,
     setStartFromResetHint,
     selectedWorkspaceTarget,
-    workspaceHostScope
+    focusedHostScope
   } = input
 
   const handleProjectChange = useCallback(
@@ -138,7 +138,7 @@ export function useProjectTargetActions(input: ProjectTargetActionsInput) {
         projects,
         projectHostSetups,
         projectId,
-        focusedHostScope: preferredHostId ?? workspaceHostScope,
+        focusedHostScope: preferredHostId ?? focusedHostScope,
         actionableHostIds
       })
       if (!nextRepoId) {
@@ -158,7 +158,7 @@ export function useProjectTargetActions(input: ProjectTargetActionsInput) {
       repos,
       setRepoId,
       selectedWorkspaceTarget,
-      workspaceHostScope,
+      focusedHostScope,
       initialProjectGroupAppliedRef,
       setBaseBranch,
       setBranchNameOverride,

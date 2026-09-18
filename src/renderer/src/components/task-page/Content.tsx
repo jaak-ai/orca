@@ -84,7 +84,13 @@ export function TaskPageContent({
       selectedVoloTask={model.selectedVoloTask}
       selectedVoloBoard={model.selectedVoloBoard}
       openVoloDetailPage={model.openVoloDetailPage}
+      selectedVoloTaskIds={model.selectedVoloTaskIds}
+      toggleVoloTaskSelected={model.toggleVoloTaskSelected}
+      setAllDisplayedVoloTasksSelected={model.setAllDisplayedVoloTasksSelected}
+      clearVoloTaskSelection={model.clearVoloTaskSelection}
       handleUseVoloItem={model.handleUseVoloItem}
+      handleStartVoloTasks={model.handleStartVoloTasks}
+      voloLaunching={model.voloLaunching}
       closeTaskDetailPage={model.closeTaskDetailPage}
       voloDetailSourceContext={model.voloDetailSourceContext}
       onMoveVoloTask={model.moveSelectedVoloTask}

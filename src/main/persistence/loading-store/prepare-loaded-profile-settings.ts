@@ -12,6 +12,7 @@ import {
 import { normalizeSourceControlGroupOrder } from '../../../shared/source-control-group-order'
 import { normalizeProjectGroups } from '../../../shared/project-groups'
 import { normalizeVoloBoardView } from '../../../shared/volo-types'
+import { normalizeVoloWorkQueue } from '../../../shared/volo-work-queue-normalize'
 import { normalizeDisabledTuiAgents } from '../../../shared/tui-agent-selection'
 import { hasUnsupportedTuiAgentArgs } from '../../../shared/tui-agent-launch-defaults'
 import { normalizeTerminalCursorStyleDefault } from '../../../shared/terminal-cursor-style-settings'
@@ -53,6 +54,7 @@ export type PreparedLoadedProfileSettings = {
   normalizedNotifications: GlobalSettings['notifications']
   normalizedSourceControlGroupOrder: GlobalSettings['sourceControlGroupOrder']
   normalizedVoloBoardView: GlobalSettings['voloBoardView']
+  normalizedVoloWorkQueue: GlobalSettings['voloWorkQueue']
   normalizedOnboarding: PersistedState['onboarding']
   normalizedProjectGroups: ProjectGroup[]
 }
@@ -234,6 +236,7 @@ export function prepareLoadedProfileSettings(
   )
   // Why: pre-feature profiles have no voloBoardView; normalizing hydrates the default without a destructive migration.
   const normalizedVoloBoardView = normalizeVoloBoardView(parsed.settings?.voloBoardView)
+  const normalizedVoloWorkQueue = normalizeVoloWorkQueue(parsed.settings?.voloWorkQueue)
   if (
     parsed.settings?.sourceControlGroupOrder !== undefined &&
     parsed.settings.sourceControlGroupOrder !== normalizedSourceControlGroupOrder
@@ -261,6 +264,7 @@ export function prepareLoadedProfileSettings(
     normalizedNotifications,
     normalizedSourceControlGroupOrder,
     normalizedVoloBoardView,
+    normalizedVoloWorkQueue,
     normalizedOnboarding,
     normalizedProjectGroups
   }

@@ -16,7 +16,7 @@ export type ComposerRuntimeTargetSelectionInput = Pick<
   | 'selectedProjectHostSetupOverrideId'
   | 'settings'
   | 'sshConnectionStates'
-  | 'workspaceHostScope'
+  | 'focusedHostScope'
   | 'worktreesByRepo'
 >
 

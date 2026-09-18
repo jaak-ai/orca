@@ -265,9 +265,9 @@ describe('feature interaction writer boundaries', () => {
   it('records Volo provider-depth for workspace use', () => {
     expect(
       sourceBetween(
-        componentSource('task-page/hooks/use-task-page-volo-actions.ts'),
-        'const handleUseVoloItem',
-        'return { handleUseVoloItem }'
+        componentSource('use-task-page-volo-actions.ts'),
+        'const confirmVoloQueueTarget',
+        'const handleUseVoloItem'
       )
     ).toContain("recordFeatureInteraction('volo-tasks')")
   })

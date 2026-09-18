@@ -18,21 +18,34 @@ const bundleId = process.env.ORCA_COMPUTER_MACOS_BUNDLE_ID ?? 'com.stablyai.orca
 const displayName = 'Orca Computer Use'
 const signingIdentity = resolveSigningIdentity()
 const universalTriples = ['arm64-apple-macosx', 'x86_64-apple-macosx']
+const singleArch = process.argv.slice(2).includes('--single-arch')
 
 if (process.platform !== 'darwin') {
   process.exit(0)
 }
 
-buildUniversalBinary()
+buildHelperBinary()
 chmodSync(binaryPath, 0o755)
 createHelperApp()
 
-function buildUniversalBinary() {
-  const builtBinaries = universalTriples.map((triple) => {
+function helperTriples() {
+  if (!singleArch) {
+    return universalTriples
+  }
+  return [process.arch === 'arm64' ? 'arm64-apple-macosx' : 'x86_64-apple-macosx']
+}
+
+function buildHelperBinary() {
+  const triples = helperTriples()
+  const builtBinaries = triples.map((triple) => {
     run('swift', ['build', '-c', 'release', '--package-path', packagePath, '--triple', triple])
     return path.join(packagePath, '.build', triple, 'release', 'orca-computer-use-macos')
   })
   mkdirSync(path.dirname(binaryPath), { recursive: true })
+  if (builtBinaries.length === 1) {
+    copyFileSync(builtBinaries[0], binaryPath)
+    return
+  }
   run('lipo', ['-create', ...builtBinaries, '-output', binaryPath])
 }
 

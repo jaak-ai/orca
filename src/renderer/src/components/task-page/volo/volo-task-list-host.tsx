@@ -2,6 +2,7 @@ import React from 'react'
 import { LoaderCircle } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
+import { Checkbox } from '@/components/ui/checkbox'
 import { VoloIcon } from '@/components/icons/VoloIcon'
 import { translate } from '@/i18n/i18n'
 import { formatRelativeTime } from '@/components/task-page-source-context'
@@ -9,6 +10,7 @@ import { VoloTaskWorkspace } from './volo-task-workspace'
 import type { VoloBoard, VoloTask } from '../../../../../shared/volo-types'
 import type { TaskProvider } from '../../../../../shared/task-providers'
 import type { TaskSourceContext } from '../../../../../shared/task-source-context'
+import { cn } from '@/lib/utils'
 
 export type VoloTaskListHostProps = {
   voloStatusReady: boolean
@@ -22,8 +24,14 @@ export type VoloTaskListHostProps = {
   voloSearchInput: string
   selectedVoloTask: VoloTask | null
   selectedVoloBoard: VoloBoard | null
+  selectedVoloTaskIds: ReadonlySet<string>
+  toggleVoloTaskSelected: (taskId: string, selected: boolean) => void
+  setAllDisplayedVoloTasksSelected: (selected: boolean) => void
+  clearVoloTaskSelection: (taskIds: readonly string[]) => void
   openVoloDetailPage: (task: VoloTask) => void
   handleUseVoloItem: (task: VoloTask) => void
+  handleStartVoloTasks: (tasks: readonly VoloTask[]) => Promise<string[]>
+  voloLaunching: boolean
   closeTaskDetailPage: () => void
   voloDetailSourceContext: TaskSourceContext | null
   onMoveVoloTask: (task: VoloTask, columnId: string) => Promise<void>
@@ -51,8 +59,14 @@ export function VoloTaskListHost({
   voloSearchInput,
   selectedVoloTask,
   selectedVoloBoard,
+  selectedVoloTaskIds,
+  toggleVoloTaskSelected,
+  setAllDisplayedVoloTasksSelected,
+  clearVoloTaskSelection,
   openVoloDetailPage,
   handleUseVoloItem,
+  handleStartVoloTasks,
+  voloLaunching,
   closeTaskDetailPage,
   voloDetailSourceContext,
   onMoveVoloTask
@@ -90,14 +104,55 @@ export function VoloTaskListHost({
     )
   }
 
+  const selectedCount = displayedVoloTasks.filter((task) => selectedVoloTaskIds.has(task.id)).length
+  const allVisibleSelected =
+    displayedVoloTasks.length > 0 && selectedCount === displayedVoloTasks.length
+  const someVisibleSelected = selectedCount > 0 && !allVisibleSelected
+
   return (
     <div className="flex min-h-0 max-h-full flex-col overflow-hidden rounded-md rounded-t-none border border-t-0 border-border/50 bg-background shadow-sm">
       <div className="flex h-10 flex-none items-center justify-between gap-3 border-b border-border/50 bg-muted/35 px-3">
-        <div className="min-w-0 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
-          {translate('auto.components.TaskPage.voloTasksHeader', 'Volo tasks')}
+        <div className="flex min-w-0 items-center gap-2 text-[11px] font-medium uppercase tracking-[0.12em] text-muted-foreground">
+          <Checkbox
+            checked={allVisibleSelected ? true : someVisibleSelected ? 'indeterminate' : false}
+            disabled={displayedVoloTasks.length === 0 || voloLaunching}
+            onCheckedChange={(checked) => setAllDisplayedVoloTasksSelected(checked === true)}
+            aria-label={translate(
+              'auto.components.TaskPage.voloSelectAllTasks',
+              'Select all visible Volo tasks'
+            )}
+          />
+          <span>{translate('auto.components.TaskPage.voloTasksHeader', 'Volo tasks')}</span>
         </div>
-        <div className="shrink-0 text-[11px] text-muted-foreground">
-          {displayedVoloTasks.length} {translate('auto.components.TaskPage.b7bae28b6a', 'shown')}
+        <div className="flex shrink-0 items-center gap-2">
+          {selectedCount > 0 ? (
+            <Button
+              type="button"
+              size="sm"
+              className="gap-1.5"
+              disabled={voloLaunching}
+              onClick={() => {
+                const selectedTasks = displayedVoloTasks.filter((task) =>
+                  selectedVoloTaskIds.has(task.id)
+                )
+                void handleStartVoloTasks(selectedTasks).then((completedIds) => {
+                  clearVoloTaskSelection(completedIds)
+                })
+              }}
+            >
+              {voloLaunching ? <LoaderCircle className="size-3.5 animate-spin" /> : null}
+              {selectedCount === 1
+                ? translate('auto.components.TaskPage.voloQueueSelectedOne', 'Queue 1 task')
+                : translate(
+                    'auto.components.TaskPage.voloQueueSelectedMany',
+                    'Queue {{count}} tasks',
+                    { count: selectedCount }
+                  )}
+            </Button>
+          ) : null}
+          <div className="text-[11px] text-muted-foreground">
+            {displayedVoloTasks.length} {translate('auto.components.TaskPage.b7bae28b6a', 'shown')}
+          </div>
         </div>
       </div>
       <div
@@ -140,41 +195,55 @@ export function VoloTaskListHost({
         <div className="divide-y divide-border/50">
           {displayedVoloTasks.map((task) => {
             const selected = selectedVoloTask?.id === task.id
+            const checked = selectedVoloTaskIds.has(task.id)
             return (
-              <button
+              <div
                 key={task.id}
-                type="button"
-                onClick={() => openVoloDetailPage(task)}
-                className={`flex w-full items-start justify-between gap-3 px-3 py-3 text-left transition ${
+                className={cn(
+                  'flex w-full items-start gap-3 px-3 py-3 transition',
                   selected ? 'bg-accent' : 'hover:bg-accent'
-                }`}
+                )}
               >
-                <div className="min-w-0">
+                <Checkbox
+                  className="mt-1"
+                  checked={checked}
+                  disabled={voloLaunching}
+                  onCheckedChange={(value) => toggleVoloTaskSelected(task.id, value === true)}
+                  aria-label={translate(
+                    'auto.components.TaskPage.voloSelectTask',
+                    'Select {{code}}',
+                    { code: task.taskCode }
+                  )}
+                />
+                <button
+                  type="button"
+                  onClick={() => openVoloDetailPage(task)}
+                  className="min-w-0 flex-1 text-left"
+                >
                   <div className="truncate text-sm text-foreground">
                     <span className="font-medium text-muted-foreground">{task.taskCode}</span>
                     <span className="mx-2 text-muted-foreground/60">·</span>
                     {task.title}
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                    {!selectedVoloBoard && task.boardName ? <span>{task.boardName}</span> : null}
                     <span className={columnTone(task.columnType)}>{task.columnName ?? '—'}</span>
                     {task.assigneeName ? <span>{task.assigneeName}</span> : null}
                     <span>{task.priority}</span>
                     <span>{formatRelativeTime(task.updatedAt)}</span>
                   </div>
-                </div>
+                </button>
                 <Button
                   type="button"
                   size="sm"
                   variant="outline"
                   className="shrink-0"
-                  onClick={(event) => {
-                    event.stopPropagation()
-                    handleUseVoloItem(task)
-                  }}
+                  disabled={voloLaunching}
+                  onClick={() => handleUseVoloItem(task)}
                 >
-                  {translate('auto.components.TaskPage.voloUse', 'Use')}
+                  {translate('auto.components.TaskPage.voloQueueTask', 'Queue')}
                 </Button>
-              </button>
+              </div>
             )
           })}
         </div>
@@ -183,6 +252,7 @@ export function VoloTaskListHost({
         task={selectedVoloTask}
         board={selectedVoloBoard}
         onUse={handleUseVoloItem}
+        launching={voloLaunching}
         onClose={closeTaskDetailPage}
         onMove={onMoveVoloTask}
         sourceContext={voloDetailSourceContext}

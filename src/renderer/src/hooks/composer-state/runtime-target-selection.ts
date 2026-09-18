@@ -35,7 +35,7 @@ export function useComposerRuntimeTargetSelection(input: ComposerRuntimeTargetSe
     selectedProjectHostSetupOverrideId,
     settings,
     sshConnectionStates,
-    workspaceHostScope,
+    focusedHostScope,
     worktreesByRepo
   } = input
 
@@ -100,7 +100,7 @@ export function useComposerRuntimeTargetSelection(input: ComposerRuntimeTargetSe
         projectHostSetups,
         draftRepoId: repoId,
         projectHostSetupId: selectedProjectHostSetupOverrideId,
-        focusedHostScope: workspaceHostScope,
+        focusedHostScope,
         actionableHostIds
       }),
     [
@@ -110,7 +110,7 @@ export function useComposerRuntimeTargetSelection(input: ComposerRuntimeTargetSe
       projects,
       repoId,
       selectedProjectHostSetupOverrideId,
-      workspaceHostScope
+      focusedHostScope
     ]
   )
 

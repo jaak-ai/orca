@@ -129,7 +129,7 @@ export function useComposerSourceState(
     setSparseSelectedPresetId: target.asyncComposerState.setSparseSelectedPresetId,
     setStartFromResetHint: target.workspaceIdentityState.setStartFromResetHint,
     selectedWorkspaceTarget: target.runtimeTargetSelection.selectedWorkspaceTarget,
-    workspaceHostScope: target.composerTargetStore.workspaceHostScope
+    focusedHostScope: target.composerTargetStore.focusedHostScope
   })
   const branchStartPointActions = useBranchStartPointActions({
     applyLinkedGitLabWorkItem: sourceIdentityActions.applyLinkedGitLabWorkItem,

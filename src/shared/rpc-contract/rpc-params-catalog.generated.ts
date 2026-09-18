@@ -512,6 +512,15 @@ import {
   TerminalUpdateViewport
 } from './terminal-viewport-schemas-params'
 import { UpdaterCheckParams } from './updater-params'
+import {
+  BoardId,
+  Connect as ConnectOfVoloParams,
+  CreateTask,
+  ListTasks,
+  MoveTask,
+  TaskCode,
+  UpdateTask
+} from './volo-params'
 import { WorkspacePortKillParams, WorkspacePortScanParams } from './workspace-ports-params'
 import { WorktreeCreate, WorktreePrefetchCreateBase } from './worktree-create-params'
 import {
@@ -1142,6 +1151,19 @@ export const RPC_PARAMS_BY_METHOD = {
   'updater.download': null,
   'updater.getStatus': null,
   'updater.install': null,
+  'volo.connect': ConnectOfVoloParams,
+  'volo.connectFromSavedCredentials': null,
+  'volo.createTask': CreateTask,
+  'volo.disconnect': null,
+  'volo.getTask': TaskCode,
+  'volo.listBoards': null,
+  'volo.listMembers': BoardId,
+  'volo.listTasks': ListTasks,
+  'volo.moveTask': MoveTask,
+  'volo.readStatus': null,
+  'volo.status': null,
+  'volo.testConnection': null,
+  'volo.updateTask': UpdateTask,
   'workspacePorts.kill': WorkspacePortKillParams,
   'workspacePorts.scan': WorkspacePortScanParams,
   'worktree.activate': WorktreeActivate,

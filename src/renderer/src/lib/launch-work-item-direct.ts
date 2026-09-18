@@ -18,7 +18,6 @@ import { ensureHooksConfirmed } from '@/lib/ensure-hooks-confirmed'
 import type { TuiAgent } from '../../../shared/tui-agent'
 import type { SetupDecision } from '../../../shared/worktree/create-types'
 import type { GitPushTarget } from '../../../shared/worktree/types'
-import { getLinearIssueWorkspaceName } from '../../../shared/workspace-name'
 import { resolveGitHubWorkItemIdentity } from '@/lib/github-work-item-identity'
 import type { buildDirectWorkItemAgentStartupPlan } from '@/lib/launch-work-item-direct-agent'
 import {
@@ -31,6 +30,10 @@ import {
   resolveDirectSetupDecision
 } from '@/lib/launch-work-item-direct-preflight'
 import type { LaunchWorkItemDirectArgs } from '@/lib/launch-work-item-direct-types'
+import {
+  buildVoloDirectCreateWorktreeOptions,
+  getDirectLaunchWorkspaceSeedName
+} from '@/lib/launch-work-item-direct-linked'
 import { resolveSourceControlLaunchPlatform } from '@/lib/source-control-launch-platform'
 import { getSettingsForRepoRuntimeOwner } from '@/lib/repo-runtime-owner'
 import { getLocalRepoProjectExecutionRuntimeContext } from '@/lib/local-preflight-context'
@@ -131,9 +134,7 @@ export async function launchWorkItemDirect(args: LaunchWorkItemDirectArgs): Prom
         })
       : null
   const workspaceName = getWorkspaceSeedName({
-    explicitName: item.linearIdentifier
-      ? getLinearIssueWorkspaceName({ identifier: item.linearIdentifier, title: item.title })
-      : (workspaceIntentName?.seedName ?? ''),
+    explicitName: getDirectLaunchWorkspaceSeedName(item, workspaceIntentName),
     prompt: '',
     linkedIssueNumber: itemType === 'issue' ? (itemNumber ?? null) : null,
     linkedPR: itemType === 'pr' ? (itemNumber ?? null) : null
@@ -167,6 +168,11 @@ export async function launchWorkItemDirect(args: LaunchWorkItemDirectArgs): Prom
   let plan: AgentSessionLaunchPlan | null = null
   let structuredLaunchCompleted = false
   const draftContent = await getDirectWorkItemDraftContent(item, repoConnectionId)
+  const voloCreateOptions = buildVoloDirectCreateWorktreeOptions(
+    item,
+    args.linkedTaskSourceContext,
+    args.parentWorktreeId
+  )
   let startupPlanFailed = false
   try {
     const result = await store.createWorktree(
@@ -194,7 +200,8 @@ export async function launchWorkItemDirect(args: LaunchWorkItemDirectArgs): Prom
       undefined,
       undefined,
       undefined,
-      resolvedCompareBaseRef
+      resolvedCompareBaseRef,
+      ...(voloCreateOptions ? [voloCreateOptions] : [])
     )
     worktreeId = result.worktree.id
     worktreePath = result.worktree.path

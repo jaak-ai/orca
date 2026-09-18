@@ -15,12 +15,14 @@ export function VoloTaskWorkspace({
   task,
   board,
   onUse,
+  launching = false,
   onClose,
   onMove
 }: {
   task: VoloTask | null
   board: VoloBoard | null
   onUse: (task: VoloTask) => void
+  launching?: boolean
   onClose: () => void
   onMove: (task: VoloTask, columnId: string) => Promise<void>
   sourceContext: TaskSourceContext | null
@@ -78,8 +80,8 @@ export function VoloTaskWorkspace({
         ) : null}
         <span className="text-xs text-muted-foreground">{task.assigneeName ?? 'Unassigned'}</span>
         <span className="text-xs text-muted-foreground">{task.priority}</span>
-        <Button type="button" size="sm" onClick={() => onUse(task)}>
-          {translate('auto.components.TaskPage.voloStartWorkspace', 'Start workspace')}
+        <Button type="button" size="sm" disabled={launching} onClick={() => onUse(task)}>
+          {translate('auto.components.TaskPage.voloQueueTask', 'Queue')}
         </Button>
       </div>
       {task.description ? (

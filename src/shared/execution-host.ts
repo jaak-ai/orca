@@ -226,6 +226,19 @@ export function getSettingsFocusedExecutionHostId(
     : LOCAL_EXECUTION_HOST_ID
 }
 
+/** Host for new work when the sidebar shows every machine: the default runtime, else this computer. */
+export function resolvePreferredCreationHostScope(
+  workspaceHostScope: ExecutionHostScope | null | undefined,
+  settings: Pick<GlobalSettings, 'activeRuntimeEnvironmentId'> | null | undefined
+): ExecutionHostId {
+  if (workspaceHostScope && workspaceHostScope !== ALL_EXECUTION_HOSTS_SCOPE) {
+    return (
+      parseExecutionHostId(workspaceHostScope)?.id ?? getSettingsFocusedExecutionHostId(settings)
+    )
+  }
+  return getSettingsFocusedExecutionHostId(settings)
+}
+
 export function getExecutionHostLabel(id: ExecutionHostScope | null | undefined): string {
   if (id === ALL_EXECUTION_HOSTS_SCOPE) {
     return 'All hosts'

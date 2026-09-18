@@ -6,6 +6,7 @@ import {
   resolveComposerActiveRepoId
 } from '@/lib/new-workspace-composer-repo'
 import { buildExecutionHostRegistry } from '../../../../shared/execution-host-registry'
+import { resolvePreferredCreationHostScope } from '../../../../shared/execution-host'
 import { getHostDisplayLabelOverrides } from '../../../../shared/host-setting-overrides'
 import type { GitHubWorkItem } from '../../../../shared/github/work-item-types'
 import type { TaskSourceContext } from '../../../../shared/task-source-context'
@@ -126,6 +127,10 @@ export function useComposerTargetStore(options: ComposerStateInput, decisions: C
   const runtimeStatusByEnvironmentId = useAppStore((s) => s.runtimeStatusByEnvironmentId)
 
   const workspaceHostScope = useAppStore((s) => s.workspaceHostScope)
+  const focusedHostScope = useMemo(
+    () => resolvePreferredCreationHostScope(workspaceHostScope, settings),
+    [settings, workspaceHostScope]
+  )
 
   const eligibleRepos = useMemo(() => getComposerEligibleRepos(repos), [repos])
 
@@ -212,6 +217,7 @@ export function useComposerTargetStore(options: ComposerStateInput, decisions: C
     runtimeEnvironments,
     runtimeStatusByEnvironmentId,
     workspaceHostScope,
+    focusedHostScope,
     eligibleRepos,
     hostOptions,
     actionableHostIds,

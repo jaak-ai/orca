@@ -11,6 +11,7 @@ type ChildAgentLineageEntry = Pick<AgentStatusEntry, 'terminalHandle' | 'orchest
  *  classifier tests), and count/badge callers can feed synthetic rows uncast. */
 export type ChildAgentClassifiableThread = {
   paneKey: string
+  worktree?: { id: string }
   currentAgentEntry?: ChildAgentLineageEntry | null
   latestEvent?: { entry: ChildAgentLineageEntry } | null
   events?: readonly { entry: ChildAgentLineageEntry }[]
@@ -49,8 +50,29 @@ function firstReportedTerminalHandle(thread: ChildAgentClassifiableThread): stri
  * child-agent filter. Classification is sticky across a thread's older events:
  * the newest entry whose parent still resolves wins.
  */
+function parentPaneKeyFromWorktreeLineage(
+  thread: ChildAgentClassifiableThread,
+  threads: readonly ChildAgentClassifiableThread[],
+  lineageByWorktreeId?: Readonly<Record<string, { parentWorktreeId: string }>>
+): string | undefined {
+  const worktreeId = thread.worktree?.id
+  if (!worktreeId) {
+    return undefined
+  }
+  const parentWorktreeId = lineageByWorktreeId?.[worktreeId]?.parentWorktreeId
+  if (!parentWorktreeId || parentWorktreeId === worktreeId) {
+    return undefined
+  }
+  const parent = threads.find((candidate) => candidate.worktree?.id === parentWorktreeId)
+  if (!parent || parent.paneKey === thread.paneKey) {
+    return undefined
+  }
+  return parent.paneKey
+}
+
 export function collectChildAgentPaneKeys(
-  threads: readonly ChildAgentClassifiableThread[]
+  threads: readonly ChildAgentClassifiableThread[],
+  lineageByWorktreeId?: Readonly<Record<string, { parentWorktreeId: string }>>
 ): Set<string> {
   const baseRows: AgentLineageSourceRow[] = threads.map((thread) => ({
     paneKey: thread.paneKey,
@@ -81,6 +103,20 @@ export function collectChildAgentPaneKeys(
       }
       if (resolveAgentRowParentPaneKey(probe, rowsByPaneKey, paneKeyByTerminalHandle)) {
         return probe
+      }
+    }
+    const parentPaneKey = parentPaneKeyFromWorktreeLineage(thread, threads, lineageByWorktreeId)
+    if (parentPaneKey) {
+      return {
+        paneKey: thread.paneKey,
+        entry: {
+          terminalHandle: base.entry.terminalHandle,
+          orchestration: {
+            parentPaneKey,
+            taskId: parentPaneKey,
+            dispatchId: parentPaneKey
+          }
+        }
       }
     }
     return base

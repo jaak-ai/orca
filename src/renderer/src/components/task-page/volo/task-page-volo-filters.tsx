@@ -17,6 +17,7 @@ import { translate } from '@/i18n/i18n'
 import { cn } from '@/lib/utils'
 import type { VoloBoard, VoloTaskFilter } from '../../../../../shared/volo-types'
 import type { VoloPreset } from '@/components/task-page-localized-options'
+import { VOLO_ALL_BOARDS_VALUE } from './volo-task-list-filter'
 
 export type TaskPageVoloFiltersProps = {
   voloPresets: VoloPreset[]
@@ -27,7 +28,7 @@ export type TaskPageVoloFiltersProps = {
   setVoloRefreshNonce: React.Dispatch<React.SetStateAction<number>>
   voloBoards: readonly VoloBoard[]
   selectedVoloBoardId: string | null
-  setSelectedVoloBoardId: (boardId: string) => void
+  setSelectedVoloBoardId: (boardId: string | null) => void
   setNewVoloTaskOpen: (open: boolean) => void
   voloBoardsLoading: boolean
   voloLoading: boolean
@@ -60,8 +61,13 @@ export function TaskPageVoloFilters({
         <div className="flex flex-wrap items-center gap-2">
           {voloBoards.length > 0 ? (
             <Select
-              value={selectedVoloBoardId ?? undefined}
-              onValueChange={(value) => setSelectedVoloBoardId(value)}
+              value={
+                selectedVoloBoardId ??
+                (activeVoloPreset === 'assigned' ? VOLO_ALL_BOARDS_VALUE : undefined)
+              }
+              onValueChange={(value) =>
+                setSelectedVoloBoardId(value === VOLO_ALL_BOARDS_VALUE ? null : value)
+              }
             >
               <SelectTrigger className="h-8 w-[220px] rounded-md border-border/50 bg-muted/50 text-xs font-medium shadow-sm">
                 <SelectValue
@@ -72,6 +78,11 @@ export function TaskPageVoloFilters({
                 />
               </SelectTrigger>
               <SelectContent>
+                {activeVoloPreset === 'assigned' ? (
+                  <SelectItem value={VOLO_ALL_BOARDS_VALUE}>
+                    {translate('auto.components.TaskPage.voloAllBoards', 'All boards')}
+                  </SelectItem>
+                ) : null}
                 {voloBoards.map((board) => (
                   <SelectItem key={board.id} value={board.id}>
                     {board.icon ? `${board.icon} ${board.name}` : board.name}
@@ -125,18 +136,18 @@ export function TaskPageVoloFilters({
                           <Checkbox
                             checked={isChecked}
                             onCheckedChange={(checked) => {
-                              if (checked) {
+                              if (checked === true) {
                                 const nextIds = [...currentlyVisibleIds, column.id]
                                 if (nextIds.length === allColumnIds.length) {
                                   setVisibleVoloColumnIds(null)
                                 } else {
                                   setVisibleVoloColumnIds(nextIds)
                                 }
-                              } else {
-                                setVisibleVoloColumnIds(
-                                  currentlyVisibleIds.filter((id) => id !== column.id)
-                                )
+                                return
                               }
+                              setVisibleVoloColumnIds(
+                                currentlyVisibleIds.filter((id) => id !== column.id)
+                              )
                             }}
                           />
                           <span className="truncate flex-1 font-medium text-left">
@@ -156,7 +167,7 @@ export function TaskPageVoloFilters({
             </Popover>
           ) : null}
           {voloPresets.map((preset) => {
-            const active = !voloSearchInput && activeVoloPreset === preset.id
+            const active = activeVoloPreset === preset.id
             return (
               <button
                 key={preset.id}
@@ -164,6 +175,9 @@ export function TaskPageVoloFilters({
                 onClick={() => {
                   setVoloSearchInput('')
                   setActiveVoloPreset(preset.id)
+                  if (preset.id !== 'assigned' && !selectedVoloBoardId && voloBoards[0]) {
+                    setSelectedVoloBoardId(voloBoards[0].id)
+                  }
                   setVoloRefreshNonce((n) => n + 1)
                 }}
                 className={cn(

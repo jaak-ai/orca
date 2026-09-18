@@ -27,6 +27,7 @@ import type { TerminalColorOverrides } from './terminal-color-overrides'
 import type { TerminalQuickCommand } from './terminal-quick-command-types'
 import type { TuiAgent } from './tui-agent'
 import type { VoloBoardViewPreferences } from './volo-types'
+import type { VoloWorkQueueState } from './volo-work-queue'
 import type {
   AgentDashboardMode,
   BranchPrefixStrategy,
@@ -369,6 +370,8 @@ export type GlobalSettings = {
   defaultLinearTeamSelection: string[] | null
   /** Volo Tasks view: selected board + per-board visible columns. */
   voloBoardView: VoloBoardViewPreferences
+  /** Volo work queue: sequential dispatch per project, with optional parallel/PM. */
+  voloWorkQueue: VoloWorkQueueState
   /** Session cookie for OpenCode Go rate-limit fetching. Stored encrypted. */
   opencodeSessionCookie: string
   /** Optional OpenCode Go workspace ID override; when set, skips the workspaces lookup and fetches usage directly. */

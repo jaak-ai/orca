@@ -54,14 +54,13 @@ export function useTaskPageVoloFetch({
           return
         }
         setVoloBoards(boards)
-        // Why: selectBoard is not a functional setter; a ref avoids refetching boards on selection change.
+        // Why: assigned may stay on All boards (null). Only replace a persisted id that disappeared.
         const current = selectedVoloBoardIdRef.current
-        const next =
-          current && boards.some((board) => board.id === current)
-            ? current
-            : (boards[0]?.id ?? null)
-        if (next !== current) {
-          setSelectedVoloBoardId(next)
+        if (current && boards.some((board) => board.id === current)) {
+          return
+        }
+        if (current) {
+          setSelectedVoloBoardId(boards[0]?.id ?? null)
         }
       })
       .catch((error: unknown) => {
